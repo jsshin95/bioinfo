@@ -1,8 +1,10 @@
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
+from sklearn.cluster import KMeans
+
 import pandas as pd
-#import numpy as np
+import numpy as np
 import matplotlib.pyplot as plt
 #import seaborn as sns
 
@@ -159,8 +161,8 @@ df15 = pd.read_csv('sstep8.tsv', delimiter='\t')
 df16 = df15.T
 df16.to_csv("sstep9.tsv", sep='\t') # column 위에 index number 제거 필요
 """
-
-df17 = pd.read_csv('sstep999.tsv', delimiter='\t')
+"""
+df17 = pd.read_csv('sstep9.tsv', delimiter='\t')
 #print(df17)
 nrow = len(df17.index)
 temp_m1=[]
@@ -179,24 +181,57 @@ for j in range(len(temp_m1)):
 df18 = df17.drop(columns=list_col_name)
 #print(list_col_name)
 df18.to_csv("sstep10.tsv", sep='\t',index=False)
+"""
+df18 = pd.read_csv('sstep9.tsv', delimiter='\t')
 
-xx = df18.iloc[:,1:].values
-yy = df18.iloc[:,0].values
-print(xx)
-print(yy)
+xx = df18.iloc[:,1:]
+yy = df18.iloc[:,0]
+#print(xx)
+#print(yy)
 
 m_sc = StandardScaler()
 x_sc = m_sc.fit_transform(xx)
 
 m_pca2 = PCA(n_components = 2)
 x_pca2 = m_pca2.fit_transform(x_sc)
+print('<pca result>')
 print(x_pca2)
 
+"""
 mglearn.discrete_scatter(x_pca2[:,0], x_pca2[:,1], y = yy)
 plt.legend(yy, loc=4)
 plt.xlabel("PC1")
 plt.ylabel("PC2")
 plt.show()
+"""
+
+k_means = KMeans(init='k-means++', n_clusters=3, n_init=12)
+k_means.fit(x_pca2)
+
+print('<k-means labels>')
+print(k_means.labels_)
+print('<k-means centers>')
+print(k_means.cluster_centers_)
+
+fig = plt.figure(figsize=(6,4))
+
+#colors = plt.cm.Spectral(np.linspace(0,1,len(set(k_means.labels_))))
+colors = ['orange','green','blue']
+
+ax = fig.add_subplot(1,1,1)
+
+for k, col in zip(range(3), colors):
+    my_members = (k_means.labels_ == k)
+    cluster_center = k_means.cluster_centers_[k]
+
+    ax.plot(x_pca2[my_members, 0], x_pca2[my_members, 1], 'w', markerfacecolor=col, marker='.', markersize=20)
+    ax.plot(cluster_center[0], cluster_center[1], 'o', markerfacecolor='red', markeredgecolor='k', markersize=7)
+
+ax.set_title('K-Means')
+ax.set_xticks(())
+ax.set_yticks(())
+plt.show()
+
 """
 """
 """
